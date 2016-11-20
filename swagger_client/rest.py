@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    SendX API
+    SendX REST API
 
-    SendX is built on the simple tenet that users must have open access to their data. SendX API is the first step in that direction. To cite some examples:   - subscribe / unsubscribe a contact from a list   - Schedule campaign to a segment of users   - Trigger transactional emails   - Get / PUT / POST and DELETE operations on team, campaign, list, contact, report etc. and so on.  As companies grow big, custom use cases around email marketing also crop up. SendX API ensures   that SendX platform is able to satisfy such unforeseen use cases. They may range from building     custom reporting dashboard to tagging contacts with custom attributes or triggering emails based on recommendation algorithm.  We do our best to have all our URLs be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer). Every endpoint (URL) may support one of four different http verbs. GET requests fetch information about an object, POST requests create objects, PUT requests update objects, and finally DELETE requests will delete objects.  Also all API calls besides:   - Subscribe / unsubscribe signup form  required **api_key** to be passed as **header**   ### The Envelope Every response is contained by an envelope. That is, each response has a predictable set of keys with which you can expect to interact: ```json {     \"status\": \"200\",      \"message\": \"OK\",     \"data\"\": [        {          ...        },        .        .        .     ] } ```  #### Status  The status key is used to communicate extra information about the response to the developer. If all goes well, you'll only ever see a code key with value 200. However, sometimes things go wrong, and in that case you might see a response like: ```json {     \"status\": \"404\" } ```  #### Data  The data key is the meat of the response. It may be a list containing single object or multiple objects  #### Message  This returns back human readable message. This is specially useful to make sense in case of error scenarios. 
+    SendX REST API has two methods:    * Identify   * Track      ## Identify API Method      Identify API Method is used to attach data to a visitor. If a contact is not yet created then we will create the contact. In case contact already exists then we update it.      **Example Request:**       ```json       {         email: \"john.doe@gmail.com\",           firstName: \"John\",         lastName: \"Doe\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\",           \"Age\": \"27\",            \"Experience\": \"5\"         },           tags: [\"Developer\", \"API Team\"],        }   ```         Note that tags are an array of strings. In case they don't exist previously then API will create them and associate them with the contact.      Similarly if a custom field doesn't exist then it is first created and then associated with the contact along-with the corresponding value. In case custom field exists already then we simply update the value of it for the aforementioned contact.      We don't delete any of the properties based on identify call. What this means is that if for the same contact you did two API calls like:         **API Call A**        ```json       {         email: \"john.doe@gmail.com\",          firstName: \"John\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\"         },           tags: [\"Developer\"],        }   ```         **API Call B**       ```json       {           email: \"john.doe@gmail.com\",           customFields: {            \"Age\": \"29\"         },           tags: [\"API Team\"],        }   ```         Then the final contact will have firstName as **John**, birthday as **1989-03-03** present. Also both tags **Developer** and **API Team** shall be present along with custom fields **Designation** and **Age**.         **Properties:**      * **firstName**: type string   * **lastName**: type string   * **email**: type string     * **company**: type string     * **birthday**: type string with format **YYYY-MM-DD** eg: 2016-11-21     * **customFields**: type map[string]string      * **tags**: type array of string          **Response:**       ```json       {           \"status\": \"200\",         \"message\": \"OK\",         \"data\": {           \"encryptedTeamId\": \"CLdh9Ig5GLIN1u8gTRvoja\",           \"encryptedId\": \"c9QF63nrBenCaAXe660byz\",           \"tags\": [             \"API Team\",             \"Tech\"           ],           \"firstName\": \"John\",           \"lastName\": \"Doe\",           \"email\": \"john.doe@gmail.com\",           \"company\": \"\",           \"birthday\": \"1989-03-03\",           \"customFields\": {             \"Age\": \"29\",             \"Designation\": \"Software Engineer\"           }           }        }     ```         ## Track API Method         Track API Method is used to associate **tags** with a contact. You can have automation rules based on tag addition and they will get executed. For eg:      * **On user registration** tag start onboarding drip for him / her.   * **Account Upgrade** tag start add user to paid user list and start account expansion drip.       **Response:**       ```json       {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": \"success\"      }   ``` 
 
     OpenAPI spec version: v1
     
@@ -24,7 +24,6 @@
 
 from __future__ import absolute_import
 
-import sys
 import io
 import json
 import ssl
@@ -33,7 +32,8 @@ import logging
 import re
 
 # python 2 and python 3 compatibility library
-from six import iteritems
+from six import PY3
+from six.moves.urllib.parse import urlencode
 
 from .configuration import Configuration
 
@@ -41,13 +41,6 @@ try:
     import urllib3
 except ImportError:
     raise ImportError('Swagger python client requires urllib3.')
-
-try:
-    # for python3
-    from urllib.parse import urlencode
-except ImportError:
-    # for python2
-    from urllib import urlencode
 
 
 logger = logging.getLogger(__name__)
@@ -112,7 +105,7 @@ class RESTClientObject(object):
         )
 
     def request(self, method, url, query_params=None, headers=None,
-                body=None, post_params=None):
+                body=None, post_params=None, _preload_content=True, _request_timeout=None):
         """
         :param method: http request method
         :param url: http request url
@@ -120,8 +113,12 @@ class RESTClientObject(object):
         :param headers: http request headers
         :param body: request json body, for `application/json`
         :param post_params: request post parameters,
-                            `application/x-www-form-urlencode`
+                            `application/x-www-form-urlencoded`
                             and `multipart/form-data`
+        :param _preload_content: if False, the urllib3.HTTPResponse object will be returned without
+                                 reading/decoding response data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of (connection, read) timeouts.
         """
         method = method.upper()
         assert method in ['GET', 'HEAD', 'DELETE', 'POST', 'PUT', 'PATCH', 'OPTIONS']
@@ -133,6 +130,13 @@ class RESTClientObject(object):
 
         post_params = post_params or {}
         headers = headers or {}
+
+        timeout = None
+        if _request_timeout:
+            if isinstance(_request_timeout, (int, ) if PY3 else (int, long)):
+                timeout = urllib3.Timeout(total=_request_timeout)
+            elif isinstance(_request_timeout, tuple) and len(_request_timeout) == 2:
+                timeout = urllib3.Timeout(connect=_request_timeout[0], read=_request_timeout[1])
 
         if 'Content-Type' not in headers:
             headers['Content-Type'] = 'application/json'
@@ -148,86 +152,128 @@ class RESTClientObject(object):
                         request_body = json.dumps(body)
                     r = self.pool_manager.request(method, url,
                                                   body=request_body,
+                                                  preload_content=_preload_content,
+                                                  timeout=timeout,
                                                   headers=headers)
-                if headers['Content-Type'] == 'application/x-www-form-urlencoded':
+                elif headers['Content-Type'] == 'application/x-www-form-urlencoded':
                     r = self.pool_manager.request(method, url,
                                                   fields=post_params,
                                                   encode_multipart=False,
+                                                  preload_content=_preload_content,
+                                                  timeout=timeout,
                                                   headers=headers)
-                if headers['Content-Type'] == 'multipart/form-data':
+                elif headers['Content-Type'] == 'multipart/form-data':
                     # must del headers['Content-Type'], or the correct Content-Type
                     # which generated by urllib3 will be overwritten.
                     del headers['Content-Type']
                     r = self.pool_manager.request(method, url,
                                                   fields=post_params,
                                                   encode_multipart=True,
+                                                  preload_content=_preload_content,
+                                                  timeout=timeout,
                                                   headers=headers)
+                # Pass a `string` parameter directly in the body to support
+                # other content types than Json when `body` argument is provided
+                # in serialized form
+                elif isinstance(body, str):
+                    request_body = body
+                    r = self.pool_manager.request(method, url,
+                                                  body=request_body,
+                                                  preload_content=_preload_content,
+                                                  timeout=timeout,
+                                                  headers=headers)
+                else:
+                    # Cannot generate the request from given parameters
+                    msg = """Cannot prepare a request message for provided arguments.
+                             Please check that your arguments match declared content type."""
+                    raise ApiException(status=0, reason=msg)
             # For `GET`, `HEAD`
             else:
                 r = self.pool_manager.request(method, url,
                                               fields=query_params,
+                                              preload_content=_preload_content,
+                                              timeout=timeout,
                                               headers=headers)
         except urllib3.exceptions.SSLError as e:
             msg = "{0}\n{1}".format(type(e).__name__, str(e))
             raise ApiException(status=0, reason=msg)
 
-        r = RESTResponse(r)
+        if _preload_content:
+            r = RESTResponse(r)
 
-        # In the python 3, the response.data is bytes.
-        # we need to decode it to string.
-        if sys.version_info > (3,):
-            r.data = r.data.decode('utf8')
+            # In the python 3, the response.data is bytes.
+            # we need to decode it to string.
+            if PY3:
+                r.data = r.data.decode('utf8')
 
-        # log response body
-        logger.debug("response body: %s" % r.data)
+            # log response body
+            logger.debug("response body: %s", r.data)
 
         if r.status not in range(200, 206):
             raise ApiException(http_resp=r)
 
         return r
 
-    def GET(self, url, headers=None, query_params=None):
+    def GET(self, url, headers=None, query_params=None, _preload_content=True, _request_timeout=None):
         return self.request("GET", url,
                             headers=headers,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             query_params=query_params)
 
-    def HEAD(self, url, headers=None, query_params=None):
+    def HEAD(self, url, headers=None, query_params=None, _preload_content=True, _request_timeout=None):
         return self.request("HEAD", url,
                             headers=headers,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             query_params=query_params)
 
-    def OPTIONS(self, url, headers=None, query_params=None, post_params=None, body=None):
+    def OPTIONS(self, url, headers=None, query_params=None, post_params=None, body=None, _preload_content=True,
+                _request_timeout=None):
         return self.request("OPTIONS", url,
                             headers=headers,
                             query_params=query_params,
                             post_params=post_params,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             body=body)
 
-    def DELETE(self, url, headers=None, query_params=None, body=None):
+    def DELETE(self, url, headers=None, query_params=None, body=None, _preload_content=True, _request_timeout=None):
         return self.request("DELETE", url,
                             headers=headers,
                             query_params=query_params,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             body=body)
 
-    def POST(self, url, headers=None, query_params=None, post_params=None, body=None):
+    def POST(self, url, headers=None, query_params=None, post_params=None, body=None, _preload_content=True,
+             _request_timeout=None):
         return self.request("POST", url,
                             headers=headers,
                             query_params=query_params,
                             post_params=post_params,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             body=body)
 
-    def PUT(self, url, headers=None, query_params=None, post_params=None, body=None):
+    def PUT(self, url, headers=None, query_params=None, post_params=None, body=None, _preload_content=True,
+            _request_timeout=None):
         return self.request("PUT", url,
                             headers=headers,
                             query_params=query_params,
                             post_params=post_params,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             body=body)
 
-    def PATCH(self, url, headers=None, query_params=None, post_params=None, body=None):
+    def PATCH(self, url, headers=None, query_params=None, post_params=None, body=None, _preload_content=True,
+              _request_timeout=None):
         return self.request("PATCH", url,
                             headers=headers,
                             query_params=query_params,
                             post_params=post_params,
+                            _preload_content=_preload_content,
+                            _request_timeout=_request_timeout,
                             body=body)
 
 

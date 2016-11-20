@@ -30,33 +30,23 @@ import unittest
 
 import swagger_client
 from swagger_client.rest import ApiException
-from swagger_client.apis.contact_api import ContactApi
+from swagger_client.models.contact_response import ContactResponse
 
 
-class TestContactApi(unittest.TestCase):
-    """ ContactApi unit test stubs """
+class TestContactResponse(unittest.TestCase):
+    """ ContactResponse unit test stubs """
 
     def setUp(self):
-        self.api = swagger_client.apis.contact_api.ContactApi()
+        pass
 
     def tearDown(self):
         pass
 
-    def test_contact_identify_post(self):
+    def testContactResponse(self):
         """
-        Test case for contact_identify_post
-
-        Identify a contact as user
+        Test ContactResponse
         """
-        pass
-
-    def test_contact_track_post(self):
-        """
-        Test case for contact_track_post
-
-        Add tracking info using tags to a contact
-        """
-        pass
+        model = swagger_client.models.contact_response.ContactResponse()
 
 
 if __name__ == '__main__':

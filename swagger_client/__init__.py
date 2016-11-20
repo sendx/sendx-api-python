@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    SendX API
+    SendX REST API
 
-    SendX is built on the simple tenet that users must have open access to their data. SendX API is the first step in that direction. To cite some examples:   - subscribe / unsubscribe a contact from a list   - Schedule campaign to a segment of users   - Trigger transactional emails   - Get / PUT / POST and DELETE operations on team, campaign, list, contact, report etc. and so on.  As companies grow big, custom use cases around email marketing also crop up. SendX API ensures   that SendX platform is able to satisfy such unforeseen use cases. They may range from building     custom reporting dashboard to tagging contacts with custom attributes or triggering emails based on recommendation algorithm.  We do our best to have all our URLs be [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer). Every endpoint (URL) may support one of four different http verbs. GET requests fetch information about an object, POST requests create objects, PUT requests update objects, and finally DELETE requests will delete objects.  Also all API calls besides:   - Subscribe / unsubscribe signup form  required **api_key** to be passed as **header**   ### The Envelope Every response is contained by an envelope. That is, each response has a predictable set of keys with which you can expect to interact: ```json {     \"status\": \"200\",      \"message\": \"OK\",     \"data\"\": [        {          ...        },        .        .        .     ] } ```  #### Status  The status key is used to communicate extra information about the response to the developer. If all goes well, you'll only ever see a code key with value 200. However, sometimes things go wrong, and in that case you might see a response like: ```json {     \"status\": \"404\" } ```  #### Data  The data key is the meat of the response. It may be a list containing single object or multiple objects  #### Message  This returns back human readable message. This is specially useful to make sense in case of error scenarios. 
+    SendX REST API has two methods:    * Identify   * Track      ## Identify API Method      Identify API Method is used to attach data to a visitor. If a contact is not yet created then we will create the contact. In case contact already exists then we update it.      **Example Request:**       ```json       {         email: \"john.doe@gmail.com\",           firstName: \"John\",         lastName: \"Doe\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\",           \"Age\": \"27\",            \"Experience\": \"5\"         },           tags: [\"Developer\", \"API Team\"],        }   ```         Note that tags are an array of strings. In case they don't exist previously then API will create them and associate them with the contact.      Similarly if a custom field doesn't exist then it is first created and then associated with the contact along-with the corresponding value. In case custom field exists already then we simply update the value of it for the aforementioned contact.      We don't delete any of the properties based on identify call. What this means is that if for the same contact you did two API calls like:         **API Call A**        ```json       {         email: \"john.doe@gmail.com\",          firstName: \"John\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\"         },           tags: [\"Developer\"],        }   ```         **API Call B**       ```json       {           email: \"john.doe@gmail.com\",           customFields: {            \"Age\": \"29\"         },           tags: [\"API Team\"],        }   ```         Then the final contact will have firstName as **John**, birthday as **1989-03-03** present. Also both tags **Developer** and **API Team** shall be present along with custom fields **Designation** and **Age**.         **Properties:**      * **firstName**: type string   * **lastName**: type string   * **email**: type string     * **company**: type string     * **birthday**: type string with format **YYYY-MM-DD** eg: 2016-11-21     * **customFields**: type map[string]string      * **tags**: type array of string          **Response:**       ```json       {           \"status\": \"200\",         \"message\": \"OK\",         \"data\": {           \"encryptedTeamId\": \"CLdh9Ig5GLIN1u8gTRvoja\",           \"encryptedId\": \"c9QF63nrBenCaAXe660byz\",           \"tags\": [             \"API Team\",             \"Tech\"           ],           \"firstName\": \"John\",           \"lastName\": \"Doe\",           \"email\": \"john.doe@gmail.com\",           \"company\": \"\",           \"birthday\": \"1989-03-03\",           \"customFields\": {             \"Age\": \"29\",             \"Designation\": \"Software Engineer\"           }           }        }     ```         ## Track API Method         Track API Method is used to associate **tags** with a contact. You can have automation rules based on tag addition and they will get executed. For eg:      * **On user registration** tag start onboarding drip for him / her.   * **Account Upgrade** tag start add user to paid user list and start account expansion drip.       **Response:**       ```json       {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": \"success\"      }   ``` 
 
     OpenAPI spec version: v1
     
@@ -25,50 +25,12 @@
 from __future__ import absolute_import
 
 # import models into sdk package
-from .models.campaign import Campaign
-from .models.campaign_add_update import CampaignAddUpdate
 from .models.contact import Contact
-from .models.contact_add_update import ContactAddUpdate
-from .models.deep_list_email_contact import DeepListEmailContact
-from .models.deep_team_email_contact import DeepTeamEmailContact
-from .models.e_content import EContent
-from .models.e_message import EMessage
-from .models.email import Email
-from .models.inline_response_200 import InlineResponse200
-from .models.inline_response_200_1 import InlineResponse2001
-from .models.inline_response_200_10 import InlineResponse20010
-from .models.inline_response_200_11 import InlineResponse20011
-from .models.inline_response_200_12 import InlineResponse20012
-from .models.inline_response_200_13 import InlineResponse20013
-from .models.inline_response_200_2 import InlineResponse2002
-from .models.inline_response_200_3 import InlineResponse2003
-from .models.inline_response_200_4 import InlineResponse2004
-from .models.inline_response_200_5 import InlineResponse2005
-from .models.inline_response_200_6 import InlineResponse2006
-from .models.inline_response_200_7 import InlineResponse2007
-from .models.inline_response_200_8 import InlineResponse2008
-from .models.inline_response_200_9 import InlineResponse2009
-from .models.link import Link
-from .models.link_add_update import LinkAddUpdate
-from .models.list import List
-from .models.list_add_update import ListAddUpdate
-from .models.tag import Tag
-from .models.tag_add_update import TagAddUpdate
-from .models.tag_contact import TagContact
-from .models.tag_contact_id import TagContactId
-from .models.team import Team
-from .models.team_add_update import TeamAddUpdate
+from .models.contact_response import ContactResponse
+from .models.track_response import TrackResponse
 
 # import apis into sdk package
-from .apis.campaign_api import CampaignApi
 from .apis.contact_api import ContactApi
-from .apis.link_api import LinkApi
-from .apis.list_api import ListApi
-from .apis.send_api import SendApi
-from .apis.subscribe_api import SubscribeApi
-from .apis.tag_api import TagApi
-from .apis.team_api import TeamApi
-from .apis.unsubscribe_api import UnsubscribeApi
 
 # import ApiClient
 from .api_client import ApiClient
