@@ -3,7 +3,7 @@
 """
     SendX REST API
 
-    SendX REST API has two methods:    * Identify   * Track      ## Identify API Method      Identify API Method is used to attach data to a visitor. If a contact is not yet created then we will create the contact. In case contact already exists then we update it.      **Example Request:**       ```json       {         email: \"john.doe@gmail.com\",           firstName: \"John\",         lastName: \"Doe\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\",           \"Age\": \"27\",            \"Experience\": \"5\"         },           tags: [\"Developer\", \"API Team\"],        }   ```         Note that tags are an array of strings. In case they don't exist previously then API will create them and associate them with the contact.      Similarly if a custom field doesn't exist then it is first created and then associated with the contact along-with the corresponding value. In case custom field exists already then we simply update the value of it for the aforementioned contact.      We don't delete any of the properties based on identify call. What this means is that if for the same contact you did two API calls like:         **API Call A**        ```json       {         email: \"john.doe@gmail.com\",          firstName: \"John\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\"         },           tags: [\"Developer\"],        }   ```         **API Call B**       ```json       {           email: \"john.doe@gmail.com\",           customFields: {            \"Age\": \"29\"         },           tags: [\"API Team\"],        }   ```         Then the final contact will have firstName as **John**, birthday as **1989-03-03** present. Also both tags **Developer** and **API Team** shall be present along with custom fields **Designation** and **Age**.         **Properties:**      * **firstName**: type string   * **lastName**: type string   * **email**: type string     * **company**: type string     * **birthday**: type string with format **YYYY-MM-DD** eg: 2016-11-21     * **customFields**: type map[string]string      * **tags**: type array of string          **Response:**       ```json       {           \"status\": \"200\",         \"message\": \"OK\",         \"data\": {           \"encryptedTeamId\": \"CLdh9Ig5GLIN1u8gTRvoja\",           \"encryptedId\": \"c9QF63nrBenCaAXe660byz\",           \"tags\": [             \"API Team\",             \"Tech\"           ],           \"firstName\": \"John\",           \"lastName\": \"Doe\",           \"email\": \"john.doe@gmail.com\",           \"company\": \"\",           \"birthday\": \"1989-03-03\",           \"customFields\": {             \"Age\": \"29\",             \"Designation\": \"Software Engineer\"           }           }        }     ```         ## Track API Method         Track API Method is used to associate **tags** with a contact. You can have automation rules based on tag addition and they will get executed. For eg:      * **On user registration** tag start onboarding drip for him / her.   * **Account Upgrade** tag start add user to paid user list and start account expansion drip.       **Response:**       ```json       {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": \"success\"      }   ``` 
+    **NOTE:** All API calls contain 2 parameters - 'api_key' and 'team_id'. These can be inferred from your settings page 'https://app.sendx.io/setting' under the sections 'Api Key' and 'Team Id' respectively.  SendX REST API has two methods:    * Identify   * Track    ## Identify API Method    Identify API Method is used to attach data to a visitor. If a contact is not yet created then we will create the contact. In case contact already exists then we update it.    **Example Request:**       ```json      {         email: \"john.doe@gmail.com\",         firstName: \"John\",         lastName: \"Doe\",         birthday: \"1989-03-03\",         customFields: {           \"Designation\": \"Software Engineer\",           \"Age\": \"27\",           \"Experience\": \"5\"         },         tags: [\"Developer\", \"API Team\"],      }   ```         Note that tags are an array of strings. In case they don't exist previously then API will create them and associate them with the contact.      Similarly if a custom field doesn't exist then it is first created and then associated with the contact along-with the corresponding value. In case custom field exists already then we simply update the value of it for the aforementioned contact.      We don't delete any of the properties based on identify call. What this means is that if for the same contact you did two API calls like:         **API Call A**        ```json      {         email: \"john.doe@gmail.com\",         firstName: \"John\",         birthday: \"1989-03-03\",         customFields: {           \"Designation\": \"Software Engineer\"         },         tags: [\"Developer\"],      }   ```         **API Call B**       ```json      {         email: \"john.doe@gmail.com\",         customFields: {           \"Age\": \"29\"         },         tags: [\"API Team\"],      }   ```         Then the final contact will have firstName as **John**, birthday as **1989-03-03** present. Also both tags **Developer** and **API Team** shall be present along with custom fields **Designation** and **Age**.         **Properties:**      * **firstName**: type string   * **lastName**: type string   * **email**: type string     * **company**: type string     * **birthday**: type string with format **YYYY-MM-DD** eg: 2016-11-21     * **customFields**: type map[string]string      * **tags**: type array of string          **Response:**       ```json      {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": {           \"encryptedTeamId\": \"CLdh9Ig5GLIN1u8gTRvoja\",           \"encryptedId\": \"c9QF63nrBenCaAXe660byz\",           \"tags\": [             \"API Team\",             \"Tech\"           ],           \"firstName\": \"John\",           \"lastName\": \"Doe\",           \"email\": \"john.doe@gmail.com\",           \"company\": \"\",           \"birthday\": \"1989-03-03\",           \"customFields\": {             \"Age\": \"29\",             \"Designation\": \"Software Engineer\"           }           }        }   ```         ## Track API Method         Track API Method is used to associate **tags** with a contact. You can have automation rules based on tag addition and they will get executed. For eg:      * **On user registration** tag start onboarding drip for him / her.   * **Account Upgrade** tag start add user to paid user list and start account expansion drip.       **Response:**       ```json      {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": \"success\"      }   ``` 
 
     OpenAPI spec version: v1
     
@@ -51,7 +51,7 @@ class ContactApi(object):
                 config.api_client = ApiClient()
             self.api_client = config.api_client
 
-    def contact_identify_post(self, api_key, team_id, body, **kwargs):
+    def contact_identify_post(self, api_key, team_id, contact_details, **kwargs):
         """
         Identify a contact as user
         
@@ -62,25 +62,25 @@ class ContactApi(object):
         >>> def callback_function(response):
         >>>     pprint(response)
         >>>
-        >>> thread = api.contact_identify_post(api_key, team_id, body, callback=callback_function)
+        >>> thread = api.contact_identify_post(api_key, team_id, contact_details, callback=callback_function)
 
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param str api_key:  (required)
         :param str team_id:  (required)
-        :param Contact body: Contact details (required)
+        :param ContactRequest contact_details: Contact details (required)
         :return: ContactResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('callback'):
-            return self.contact_identify_post_with_http_info(api_key, team_id, body, **kwargs)
+            return self.contact_identify_post_with_http_info(api_key, team_id, contact_details, **kwargs)
         else:
-            (data) = self.contact_identify_post_with_http_info(api_key, team_id, body, **kwargs)
+            (data) = self.contact_identify_post_with_http_info(api_key, team_id, contact_details, **kwargs)
             return data
 
-    def contact_identify_post_with_http_info(self, api_key, team_id, body, **kwargs):
+    def contact_identify_post_with_http_info(self, api_key, team_id, contact_details, **kwargs):
         """
         Identify a contact as user
         
@@ -91,19 +91,19 @@ class ContactApi(object):
         >>> def callback_function(response):
         >>>     pprint(response)
         >>>
-        >>> thread = api.contact_identify_post_with_http_info(api_key, team_id, body, callback=callback_function)
+        >>> thread = api.contact_identify_post_with_http_info(api_key, team_id, contact_details, callback=callback_function)
 
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param str api_key:  (required)
         :param str team_id:  (required)
-        :param Contact body: Contact details (required)
+        :param ContactRequest contact_details: Contact details (required)
         :return: ContactResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['api_key', 'team_id', 'body']
+        all_params = ['api_key', 'team_id', 'contact_details']
         all_params.append('callback')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -124,9 +124,9 @@ class ContactApi(object):
         # verify the required parameter 'team_id' is set
         if ('team_id' not in params) or (params['team_id'] is None):
             raise ValueError("Missing the required parameter `team_id` when calling `contact_identify_post`")
-        # verify the required parameter 'body' is set
-        if ('body' not in params) or (params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `contact_identify_post`")
+        # verify the required parameter 'contact_details' is set
+        if ('contact_details' not in params) or (params['contact_details'] is None):
+            raise ValueError("Missing the required parameter `contact_details` when calling `contact_identify_post`")
 
 
         collection_formats = {}
@@ -136,7 +136,7 @@ class ContactApi(object):
 
         query_params = {}
         if 'team_id' in params:
-            query_params['teamId'] = params['team_id']
+            query_params['team_id'] = params['team_id']
 
         header_params = {}
         if 'api_key' in params:
@@ -146,8 +146,8 @@ class ContactApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'body' in params:
-            body_params = params['body']
+        if 'contact_details' in params:
+            body_params = params['contact_details']
 
         # HTTP header `Accept`
         header_params['Accept'] = self.api_client.\
@@ -177,7 +177,7 @@ class ContactApi(object):
                                             _request_timeout=params.get('_request_timeout'),
                                             collection_formats=collection_formats)
 
-    def contact_track_post(self, api_key, team_id, contact_id, tag, **kwargs):
+    def contact_track_post(self, api_key, team_id, email, tag, **kwargs):
         """
         Add tracking info using tags to a contact
         
@@ -188,13 +188,13 @@ class ContactApi(object):
         >>> def callback_function(response):
         >>>     pprint(response)
         >>>
-        >>> thread = api.contact_track_post(api_key, team_id, contact_id, tag, callback=callback_function)
+        >>> thread = api.contact_track_post(api_key, team_id, email, tag, callback=callback_function)
 
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param str api_key:  (required)
         :param str team_id:  (required)
-        :param str contact_id:  (required)
+        :param str email:  (required)
         :param str tag:  (required)
         :return: TrackResponse
                  If the method is called asynchronously,
@@ -202,12 +202,12 @@ class ContactApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('callback'):
-            return self.contact_track_post_with_http_info(api_key, team_id, contact_id, tag, **kwargs)
+            return self.contact_track_post_with_http_info(api_key, team_id, email, tag, **kwargs)
         else:
-            (data) = self.contact_track_post_with_http_info(api_key, team_id, contact_id, tag, **kwargs)
+            (data) = self.contact_track_post_with_http_info(api_key, team_id, email, tag, **kwargs)
             return data
 
-    def contact_track_post_with_http_info(self, api_key, team_id, contact_id, tag, **kwargs):
+    def contact_track_post_with_http_info(self, api_key, team_id, email, tag, **kwargs):
         """
         Add tracking info using tags to a contact
         
@@ -218,20 +218,20 @@ class ContactApi(object):
         >>> def callback_function(response):
         >>>     pprint(response)
         >>>
-        >>> thread = api.contact_track_post_with_http_info(api_key, team_id, contact_id, tag, callback=callback_function)
+        >>> thread = api.contact_track_post_with_http_info(api_key, team_id, email, tag, callback=callback_function)
 
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param str api_key:  (required)
         :param str team_id:  (required)
-        :param str contact_id:  (required)
+        :param str email:  (required)
         :param str tag:  (required)
         :return: TrackResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['api_key', 'team_id', 'contact_id', 'tag']
+        all_params = ['api_key', 'team_id', 'email', 'tag']
         all_params.append('callback')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -252,9 +252,9 @@ class ContactApi(object):
         # verify the required parameter 'team_id' is set
         if ('team_id' not in params) or (params['team_id'] is None):
             raise ValueError("Missing the required parameter `team_id` when calling `contact_track_post`")
-        # verify the required parameter 'contact_id' is set
-        if ('contact_id' not in params) or (params['contact_id'] is None):
-            raise ValueError("Missing the required parameter `contact_id` when calling `contact_track_post`")
+        # verify the required parameter 'email' is set
+        if ('email' not in params) or (params['email'] is None):
+            raise ValueError("Missing the required parameter `email` when calling `contact_track_post`")
         # verify the required parameter 'tag' is set
         if ('tag' not in params) or (params['tag'] is None):
             raise ValueError("Missing the required parameter `tag` when calling `contact_track_post`")
@@ -267,9 +267,9 @@ class ContactApi(object):
 
         query_params = {}
         if 'team_id' in params:
-            query_params['teamId'] = params['team_id']
-        if 'contact_id' in params:
-            query_params['contactId'] = params['contact_id']
+            query_params['team_id'] = params['team_id']
+        if 'email' in params:
+            query_params['email'] = params['email']
         if 'tag' in params:
             query_params['tag'] = params['tag']
 

@@ -1,13 +1,11 @@
-# Contact
+# ContactRequest
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**encrypted_team_id** | **str** |  | [optional] 
-**encrypted_id** | **str** |  | [optional] 
 **first_name** | **str** |  | [optional] 
 **last_name** | **str** |  | [optional] 
-**email** | **str** |  | [optional] 
+**email** | **str** |  | 
 **company** | **str** |  | [optional] 
 **birthday** | **str** |  | [optional] 
 **tags** | **list[str]** |  | [optional] 

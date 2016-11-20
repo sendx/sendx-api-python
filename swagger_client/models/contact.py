@@ -3,7 +3,7 @@
 """
     SendX REST API
 
-    SendX REST API has two methods:    * Identify   * Track      ## Identify API Method      Identify API Method is used to attach data to a visitor. If a contact is not yet created then we will create the contact. In case contact already exists then we update it.      **Example Request:**       ```json       {         email: \"john.doe@gmail.com\",           firstName: \"John\",         lastName: \"Doe\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\",           \"Age\": \"27\",            \"Experience\": \"5\"         },           tags: [\"Developer\", \"API Team\"],        }   ```         Note that tags are an array of strings. In case they don't exist previously then API will create them and associate them with the contact.      Similarly if a custom field doesn't exist then it is first created and then associated with the contact along-with the corresponding value. In case custom field exists already then we simply update the value of it for the aforementioned contact.      We don't delete any of the properties based on identify call. What this means is that if for the same contact you did two API calls like:         **API Call A**        ```json       {         email: \"john.doe@gmail.com\",          firstName: \"John\",         birthday: \"1989-03-03\",         customFields: {            \"Designation\": \"Software Engineer\"         },           tags: [\"Developer\"],        }   ```         **API Call B**       ```json       {           email: \"john.doe@gmail.com\",           customFields: {            \"Age\": \"29\"         },           tags: [\"API Team\"],        }   ```         Then the final contact will have firstName as **John**, birthday as **1989-03-03** present. Also both tags **Developer** and **API Team** shall be present along with custom fields **Designation** and **Age**.         **Properties:**      * **firstName**: type string   * **lastName**: type string   * **email**: type string     * **company**: type string     * **birthday**: type string with format **YYYY-MM-DD** eg: 2016-11-21     * **customFields**: type map[string]string      * **tags**: type array of string          **Response:**       ```json       {           \"status\": \"200\",         \"message\": \"OK\",         \"data\": {           \"encryptedTeamId\": \"CLdh9Ig5GLIN1u8gTRvoja\",           \"encryptedId\": \"c9QF63nrBenCaAXe660byz\",           \"tags\": [             \"API Team\",             \"Tech\"           ],           \"firstName\": \"John\",           \"lastName\": \"Doe\",           \"email\": \"john.doe@gmail.com\",           \"company\": \"\",           \"birthday\": \"1989-03-03\",           \"customFields\": {             \"Age\": \"29\",             \"Designation\": \"Software Engineer\"           }           }        }     ```         ## Track API Method         Track API Method is used to associate **tags** with a contact. You can have automation rules based on tag addition and they will get executed. For eg:      * **On user registration** tag start onboarding drip for him / her.   * **Account Upgrade** tag start add user to paid user list and start account expansion drip.       **Response:**       ```json       {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": \"success\"      }   ``` 
+    **NOTE:** All API calls contain 2 parameters - 'api_key' and 'team_id'. These can be inferred from your settings page 'https://app.sendx.io/setting' under the sections 'Api Key' and 'Team Id' respectively.  SendX REST API has two methods:    * Identify   * Track    ## Identify API Method    Identify API Method is used to attach data to a visitor. If a contact is not yet created then we will create the contact. In case contact already exists then we update it.    **Example Request:**       ```json      {         email: \"john.doe@gmail.com\",         firstName: \"John\",         lastName: \"Doe\",         birthday: \"1989-03-03\",         customFields: {           \"Designation\": \"Software Engineer\",           \"Age\": \"27\",           \"Experience\": \"5\"         },         tags: [\"Developer\", \"API Team\"],      }   ```         Note that tags are an array of strings. In case they don't exist previously then API will create them and associate them with the contact.      Similarly if a custom field doesn't exist then it is first created and then associated with the contact along-with the corresponding value. In case custom field exists already then we simply update the value of it for the aforementioned contact.      We don't delete any of the properties based on identify call. What this means is that if for the same contact you did two API calls like:         **API Call A**        ```json      {         email: \"john.doe@gmail.com\",         firstName: \"John\",         birthday: \"1989-03-03\",         customFields: {           \"Designation\": \"Software Engineer\"         },         tags: [\"Developer\"],      }   ```         **API Call B**       ```json      {         email: \"john.doe@gmail.com\",         customFields: {           \"Age\": \"29\"         },         tags: [\"API Team\"],      }   ```         Then the final contact will have firstName as **John**, birthday as **1989-03-03** present. Also both tags **Developer** and **API Team** shall be present along with custom fields **Designation** and **Age**.         **Properties:**      * **firstName**: type string   * **lastName**: type string   * **email**: type string     * **company**: type string     * **birthday**: type string with format **YYYY-MM-DD** eg: 2016-11-21     * **customFields**: type map[string]string      * **tags**: type array of string          **Response:**       ```json      {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": {           \"encryptedTeamId\": \"CLdh9Ig5GLIN1u8gTRvoja\",           \"encryptedId\": \"c9QF63nrBenCaAXe660byz\",           \"tags\": [             \"API Team\",             \"Tech\"           ],           \"firstName\": \"John\",           \"lastName\": \"Doe\",           \"email\": \"john.doe@gmail.com\",           \"company\": \"\",           \"birthday\": \"1989-03-03\",           \"customFields\": {             \"Age\": \"29\",             \"Designation\": \"Software Engineer\"           }           }        }   ```         ## Track API Method         Track API Method is used to associate **tags** with a contact. You can have automation rules based on tag addition and they will get executed. For eg:      * **On user registration** tag start onboarding drip for him / her.   * **Account Upgrade** tag start add user to paid user list and start account expansion drip.       **Response:**       ```json      {         \"status\": \"200\",         \"message\": \"OK\",         \"data\": \"success\"      }   ``` 
 
     OpenAPI spec version: v1
     
@@ -32,7 +32,7 @@ class Contact(object):
     NOTE: This class is auto generated by the swagger code generator program.
     Do not edit the class manually.
     """
-    def __init__(self, encrypted_team_id=None, first_name=None, last_name=None, email=None, company=None, birthday=None):
+    def __init__(self, encrypted_team_id=None, encrypted_id=None, first_name=None, last_name=None, email=None, company=None, birthday=None, tags=None, custom_fields=None):
         """
         Contact - a model defined in Swagger
 
@@ -43,28 +43,37 @@ class Contact(object):
         """
         self.swagger_types = {
             'encrypted_team_id': 'str',
+            'encrypted_id': 'str',
             'first_name': 'str',
             'last_name': 'str',
             'email': 'str',
             'company': 'str',
-            'birthday': 'str'
+            'birthday': 'str',
+            'tags': 'list[str]',
+            'custom_fields': 'dict(str, str)'
         }
 
         self.attribute_map = {
             'encrypted_team_id': 'encryptedTeamId',
+            'encrypted_id': 'encryptedId',
             'first_name': 'firstName',
             'last_name': 'lastName',
             'email': 'email',
             'company': 'company',
-            'birthday': 'birthday'
+            'birthday': 'birthday',
+            'tags': 'tags',
+            'custom_fields': 'customFields'
         }
 
         self._encrypted_team_id = encrypted_team_id
+        self._encrypted_id = encrypted_id
         self._first_name = first_name
         self._last_name = last_name
         self._email = email
         self._company = company
         self._birthday = birthday
+        self._tags = tags
+        self._custom_fields = custom_fields
 
 
     @property
@@ -89,6 +98,29 @@ class Contact(object):
         """
 
         self._encrypted_team_id = encrypted_team_id
+
+    @property
+    def encrypted_id(self):
+        """
+        Gets the encrypted_id of this Contact.
+
+
+        :return: The encrypted_id of this Contact.
+        :rtype: str
+        """
+        return self._encrypted_id
+
+    @encrypted_id.setter
+    def encrypted_id(self, encrypted_id):
+        """
+        Sets the encrypted_id of this Contact.
+
+
+        :param encrypted_id: The encrypted_id of this Contact.
+        :type: str
+        """
+
+        self._encrypted_id = encrypted_id
 
     @property
     def first_name(self):
@@ -204,6 +236,52 @@ class Contact(object):
         """
 
         self._birthday = birthday
+
+    @property
+    def tags(self):
+        """
+        Gets the tags of this Contact.
+
+
+        :return: The tags of this Contact.
+        :rtype: list[str]
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """
+        Sets the tags of this Contact.
+
+
+        :param tags: The tags of this Contact.
+        :type: list[str]
+        """
+
+        self._tags = tags
+
+    @property
+    def custom_fields(self):
+        """
+        Gets the custom_fields of this Contact.
+
+
+        :return: The custom_fields of this Contact.
+        :rtype: dict(str, str)
+        """
+        return self._custom_fields
+
+    @custom_fields.setter
+    def custom_fields(self, custom_fields):
+        """
+        Sets the custom_fields of this Contact.
+
+
+        :param custom_fields: The custom_fields of this Contact.
+        :type: dict(str, str)
+        """
+
+        self._custom_fields = custom_fields
 
     def to_dict(self):
         """

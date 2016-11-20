@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **contact_identify_post**
-> ContactResponse contact_identify_post(api_key, team_id, body)
+> ContactResponse contact_identify_post(api_key, team_id, contact_details)
 
 Identify a contact as user
 
@@ -27,11 +27,11 @@ from pprint import pprint
 api_instance = swagger_client.ContactApi()
 api_key = 'api_key_example' # str | 
 team_id = 'team_id_example' # str | 
-body = swagger_client.Contact() # Contact | Contact details
+contact_details = swagger_client.ContactRequest() # ContactRequest | Contact details
 
 try: 
     # Identify a contact as user
-    api_response = api_instance.contact_identify_post(api_key, team_id, body)
+    api_response = api_instance.contact_identify_post(api_key, team_id, contact_details)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ContactApi->contact_identify_post: %s\n" % e)
@@ -43,7 +43,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **api_key** | **str**|  | 
  **team_id** | **str**|  | 
- **body** | [**Contact**](Contact.md)| Contact details | 
+ **contact_details** | [**ContactRequest**](ContactRequest.md)| Contact details | 
 
 ### Return type
 
@@ -61,7 +61,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **contact_track_post**
-> TrackResponse contact_track_post(api_key, team_id, contact_id, tag)
+> TrackResponse contact_track_post(api_key, team_id, email, tag)
 
 Add tracking info using tags to a contact
 
@@ -79,12 +79,12 @@ from pprint import pprint
 api_instance = swagger_client.ContactApi()
 api_key = 'api_key_example' # str | 
 team_id = 'team_id_example' # str | 
-contact_id = 'contact_id_example' # str | 
+email = 'email_example' # str | 
 tag = 'tag_example' # str | 
 
 try: 
     # Add tracking info using tags to a contact
-    api_response = api_instance.contact_track_post(api_key, team_id, contact_id, tag)
+    api_response = api_instance.contact_track_post(api_key, team_id, email, tag)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ContactApi->contact_track_post: %s\n" % e)
@@ -96,7 +96,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **api_key** | **str**|  | 
  **team_id** | **str**|  | 
- **contact_id** | **str**|  | 
+ **email** | **str**|  | 
  **tag** | **str**|  | 
 
 ### Return type
