@@ -66,27 +66,27 @@ The the final contact will have firstName as **John**, birthday as **1989-03-03*
 **Response:**
 
 > 
-{
-  "status": "200",
-  "message": "OK",
-  "data": {
-    "encryptedTeamId": "CLdh9Ig5GLIN1u8gTRvoja",
-    "encryptedId": "c9QF63nrBenCaAXe660byz",
-    "tags": [
-      "API Team",
-      "Tech"
-    ],
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@gmail.com",
-    "company": "",
-    "birthday": "1989-03-03",
-    "customFields": {
-      "Age": "29",
-      "Designation": "Software Engineer"
+    {
+      "status": "200",
+      "message": "OK",
+      "data": {
+        "encryptedTeamId": "CLdh9Ig5GLIN1u8gTRvoja",
+        "encryptedId": "c9QF63nrBenCaAXe660byz",
+        "tags": [
+          "API Team",
+          "Tech"
+        ],
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@gmail.com",
+        "company": "",
+        "birthday": "1989-03-03",
+        "customFields": {
+          "Age": "29",
+          "Designation": "Software Engineer"
+        }
+      }
     }
-  }
-}
 
 
 ## <a name="track_api"></a> Track API Method
