@@ -1,3 +1,5 @@
+# SendX Python Client
+
 SendX REST API has two methods:
 
 * [Identify](#identify_api)
