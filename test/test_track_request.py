@@ -30,11 +30,11 @@ import unittest
 
 import swagger_client
 from swagger_client.rest import ApiException
-from swagger_client.models.contact_response import ContactResponse
+from swagger_client.models.track_request import TrackRequest
 
 
-class TestContactResponse(unittest.TestCase):
-    """ ContactResponse unit test stubs """
+class TestTrackRequest(unittest.TestCase):
+    """ TrackRequest unit test stubs """
 
     def setUp(self):
         pass
@@ -42,11 +42,11 @@ class TestContactResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testContactResponse(self):
+    def testTrackRequest(self):
         """
-        Test ContactResponse
+        Test TrackRequest
         """
-        model = swagger_client.models.contact_response.ContactResponse()
+        model = swagger_client.models.track_request.TrackRequest()
 
 
 if __name__ == '__main__':

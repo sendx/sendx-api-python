@@ -61,7 +61,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **contact_track_post**
-> TrackResponse contact_track_post(api_key, team_id, email, tag)
+> TrackResponse contact_track_post(api_key, team_id, email, track_details)
 
 Add tracking info using tags to a contact
 
@@ -80,11 +80,11 @@ api_instance = swagger_client.ContactApi()
 api_key = 'api_key_example' # str | 
 team_id = 'team_id_example' # str | 
 email = 'email_example' # str | 
-tag = 'tag_example' # str | 
+track_details = swagger_client.TrackRequest() # TrackRequest | Track Details
 
 try: 
     # Add tracking info using tags to a contact
-    api_response = api_instance.contact_track_post(api_key, team_id, email, tag)
+    api_response = api_instance.contact_track_post(api_key, team_id, email, track_details)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ContactApi->contact_track_post: %s\n" % e)
@@ -97,7 +97,7 @@ Name | Type | Description  | Notes
  **api_key** | **str**|  | 
  **team_id** | **str**|  | 
  **email** | **str**|  | 
- **tag** | **str**|  | 
+ **track_details** | [**TrackRequest**](TrackRequest.md)| Track Details | 
 
 ### Return type
 
