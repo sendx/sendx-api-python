@@ -191,6 +191,7 @@ api_instance = swagger_client.ContactApi()
 api_key = 'api_key_example' # str | 
 team_id = 'team_id_example' # str | 
 contact_details = swagger_client.ContactRequest() # ContactRequest | Contact details
+contact_details.email = "pythonapi@sendx.io" # Specifying contact email is mandatory
 
 try:
     # Identify a contact as user
@@ -200,6 +201,21 @@ except ApiException as e:
     print("Exception when calling ContactApi->contact_identify_post: %s\n" % e)
 
 ```
+
+
+```
+track_details = swagger_client.TrackRequest() # TrackRequest | Track details
+track_details.add_tags = ["paid user", "startup plan"] 
+track_details.remove_tags = ["trial user"]
+
+try:
+    # Track contact 
+    api_response = api_instance.contact_track_post(api_key, team_id, "pythonapi@sendx.io", track_details)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling ContactApi->contact_track_post: %s\n" % e)
+```
+
 
 ## Documentation for API Endpoints
 
