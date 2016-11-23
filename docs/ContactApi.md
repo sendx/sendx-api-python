@@ -1,6 +1,6 @@
 # swagger_client.ContactApi
 
-All URIs are relative to *http://app.sendx.io/api/v1*
+All URIs are relative to *https://app.sendx.io/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

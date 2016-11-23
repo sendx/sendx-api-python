@@ -56,7 +56,7 @@ class Configuration(object):
         Constructor
         """
         # Default Base url
-        self.host = "http://app.sendx.io/api/v1"
+        self.host = "https://app.sendx.io/api/v1"
         # Default api client
         self.api_client = None
         # Temp file folder for downloading files
